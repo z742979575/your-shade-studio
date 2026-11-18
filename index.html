@@ -866,8 +866,10 @@
     .card-shade-title{font-family:var(--font-serif);font-size:66px;line-height:.9;font-weight:500;letter-spacing:-.055em;margin-top:8px}
     .card-made{font-size:14px;line-height:20px;margin-top:14px}
     .card-front-foot{position:relative;z-index:1;display:flex;justify-content:space-between;gap:16px;margin-top:36px;padding-top:14px;border-top:1px solid rgba(33,17,21,.18);font-size:10px;line-height:14px;letter-spacing:.06em}
+    .card-face--front{transform:rotateY(0deg) translateZ(1px)}
+    .card-face *,.card-face::before,.card-face::after{-webkit-backface-visibility:hidden;backface-visibility:hidden}
     .card-face--back{
-      transform:rotateY(180deg);padding:28px;color:var(--ink);background:var(--cream);
+      transform:rotateY(180deg) translateZ(1px);padding:28px;color:var(--ink);background:var(--cream);
       display:flex;flex-direction:column;
     }
     .card-back-label{display:flex;justify-content:space-between;gap:12px;font-size:10px;line-height:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
@@ -4143,6 +4145,12 @@
           tl5
             .from(".card-stage", { y: 24, opacity: .25, ease: "none" }, 0)
             .to(flipCard, { rotateY: 180, ease: "none", duration: .62 }, .18);
+          // iOS WebKit can leak the hidden face through: swap visibility at the half-turn
+          const cardFront = $(".card-face--front", flipCard), cardBack = $(".card-face--back", flipCard);
+          if (cardFront && cardBack) {
+            tl5.set(cardFront, { visibility: "visible" }, 0).set(cardBack, { visibility: "hidden" }, 0)
+               .set(cardFront, { visibility: "hidden" }, .49).set(cardBack, { visibility: "visible" }, .49);
+          }
           const scene5Copy = [$(".scene-card-copy", scene5), $(".scene-number", scene5)].filter(Boolean);
           tl5.to(scene5Copy, { opacity: 0, duration: .06, ease: "none" }, .64);
 
